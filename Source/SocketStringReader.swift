@@ -23,51 +23,50 @@
 //  THE SOFTWARE.
 
 struct SocketStringReader {
-    let message: String
-    var currentIndex: String.Index
-    var hasNext: Bool {
-        return currentIndex != message.endIndex
+  let message: String
+  var currentIndex: String.Index
+  var hasNext: Bool {
+    return currentIndex != message.endIndex
+  }
+  
+  var currentCharacter: String {
+    return String(message[currentIndex])
+  }
+  
+  init(message: String) {
+    self.message = message
+    currentIndex = message.startIndex
+  }
+  
+  @discardableResult
+  mutating func advance(by: Int) -> String.Index {
+    currentIndex = message.index(currentIndex, offsetBy: by)
+    
+    return currentIndex
+  }
+  
+  mutating func read(count: Int) -> String {
+    let readString = message[currentIndex..<message.index(currentIndex, offsetBy: count)]
+    
+    advance(by: count)
+    
+    return String(readString)
+  }
+  
+  mutating func readUntilOccurence(of string: String) -> String {
+    let substring = message[currentIndex..<message.endIndex]
+    
+    guard let foundRange = substring.range(of: string) else {
+      currentIndex = message.endIndex
+      
+      return String(substring)
     }
     
-    var currentCharacter: String {
-        return String(message[currentIndex])
-    }
-    
-    init(message: String) {
-        self.message = message
-        currentIndex = message.startIndex
-    }
-    
-    @discardableResult
-    mutating func advance(by: Int) -> String.Index {
-        currentIndex = message.characters.index(currentIndex, offsetBy: by)
-        
-        return currentIndex
-    }
-    
-    mutating func read(count: Int) -> String {
-        let readString = message[currentIndex..<message.characters.index(currentIndex, offsetBy: count)]
-        
-        advance(by: count)
-        
-        return readString
-    }
-    
-    mutating func readUntilOccurence(of string: String) -> String {
-        let substring = message[currentIndex..<message.endIndex]
-        
-        guard let foundRange = substring.range(of: string) else {
-            currentIndex = message.endIndex
-            
-            return substring
-        }
-        
-        advance(by: message.characters.distance(from: message.characters.startIndex, to: foundRange.lowerBound) + 1)
-        
-        return substring.substring(to: foundRange.lowerBound)
-    }
-    
-    mutating func readUntilEnd() -> String {
-        return read(count: message.characters.distance(from: currentIndex, to: message.endIndex))
-    }
+    advance(by: message.distance(from: message.startIndex, to: foundRange.lowerBound) + 1)
+    return String(substring[..<foundRange.lowerBound])
+  }
+  
+  mutating func readUntilEnd() -> String {
+    return read(count: message.distance(from: currentIndex, to: message.endIndex))
+  }
 }
